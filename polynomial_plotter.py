@@ -151,27 +151,14 @@ def main():
                         help="number of points used to draw the curve")
 
 
-    parser.add_argument(
-    "--integrate",
-    action="store_true",
-    help="approximate the definite integral"
-    )
-    parser.add_argument(
-    "--a",
-    type=float,
-    help="left endpoint of the integration interval"
-    )
-    parser.add_argument(
-    "--b",
-    type=float,
-    help="right endpoint of the integration interval"
-    )
-    parser.add_argument(
-    "--steps",
-    type=int,
-    default=1000,
-    help="number of subintervals used for numerical integration"
-    )
+    parser.add_argument("--integrate", action="store_true",
+                        help="approximate the definite integral")
+    parser.add_argument("--a", type=float,
+                        help="left endpoint of the integration interval")
+    parser.add_argument("--b", type=float,
+                        help="right endpoint of the integration interval")
+    parser.add_argument("--steps", type=int, default=1000,
+                        help="number of subintervals used for numerical integration")
 
 
     args = parser.parse_args()
