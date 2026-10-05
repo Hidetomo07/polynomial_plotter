@@ -53,6 +53,21 @@ def evaluate_polynomial(x, coefficients):
     return result
 
 
+def approximate_integral(coefficients, a, b, steps):
+    h = (b - a) / steps
+
+    total = (
+        evaluate_polynomial(a, coefficients)
+        + evaluate_polynomial(b, coefficients)
+    ) / 2
+
+    for i in range(1, steps):
+        x = a + i * h
+        total += evaluate_polynomial(x, coefficients)
+
+    return h * total
+
+
 def polynomial_text(coefficients, math_text=False):
     """Make a readable formula, omitting zero terms and unnecessary 1s."""
     terms = []
@@ -134,6 +149,31 @@ def main():
                         help="right end of the x-axis range")
     parser.add_argument("--points", type=int, default=500,
                         help="number of points used to draw the curve")
+
+
+    parser.add_argument(
+    "--integrate",
+    action="store_true",
+    help="approximate the definite integral"
+    )
+    parser.add_argument(
+    "--a",
+    type=float,
+    help="left endpoint of the integration interval"
+    )
+    parser.add_argument(
+    "--b",
+    type=float,
+    help="right endpoint of the integration interval"
+    )
+    parser.add_argument(
+    "--steps",
+    type=int,
+    default=1000,
+    help="number of subintervals used for numerical integration"
+    )
+
+
     args = parser.parse_args()
 
     if not (math.isfinite(args.xmin) and math.isfinite(args.xmax)
@@ -146,12 +186,39 @@ def main():
     if args.output.suffix.lower() not in (".png", ".svg"):
         parser.error("--output must have a .png or .svg extension")
 
+
+    if args.integrate:
+        if args.a is None or args.b is None:
+            parser.error("--integrate requires both --a and --b")
+        if not (math.isfinite(args.a) and math.isfinite(args.b)):
+            parser.error("--a and --b must be finite numbers")
+        if args.a >= args.b:
+            parser.error("--a must be less than --b")
+        if args.steps <= 0:
+            parser.error("--steps must be a positive integer")
+    
+
     try:
         degree = ask_degree()
         coefficients = ask_coefficients(degree)
         print("\nf(x) = " + polynomial_text(coefficients))
         save_graph(coefficients, args.xmin, args.xmax, args.points, args.output)
         print("Graph saved to:", args.output.resolve())
+
+
+        if args.integrate:
+            integral = approximate_integral(
+                coefficients, args.a, args.b, args.steps
+            )
+            
+            print("\nNumerical integration")
+            print("Polynomial:", polynomial_text(coefficients))
+            print(f"Interval: [{args.a}, {args.b}]")
+            print("Method: Composite trapezoidal rule")
+            print("Subintervals:", args.steps)
+            print("Approximate integral:", integral)
+
+
     except EOFError:
         parser.exit(2, "\nInput ended before all coefficients were entered.\n")
     except KeyboardInterrupt:
